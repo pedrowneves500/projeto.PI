@@ -2,12 +2,14 @@
 #include <stdio.h>
 
 static Texture2D menu_background = {0};
+static Font title_font = {0};
 
 // Definição dos estados do jogo
 typedef enum {
     STATE_MENU,
     STATE_FASE1,
     STATE_FASE2,
+    STATE_CREDITOS,
     STATE_SAIR
 } GameState;
 
@@ -15,8 +17,9 @@ typedef enum {
 typedef enum {
     MENU_START_GAME1 = 0,
     MENU_START_GAME2,
+    POS_CREDITOS,
     MENU_EXIT,
-    NUM_MENU_OPTIONS 
+    NUM_MENU_OPTIONS
 } MenuOptions;
 
 // Variável para rastrear qual opção está selecionada
@@ -44,23 +47,31 @@ GameState run_menu() {
         if (selecionado == MENU_EXIT) {
             return STATE_SAIR; 
         }
+
+        if (selecionado == POS_CREDITOS) {
+            return STATE_CREDITOS; 
+        }
     }
 
     // Lógica de Desenho
     BeginDrawing();
+        
         ClearBackground(BLACK);
-        DrawTexture(menu_background, 0, 0, WHITE);
+        DrawTexture(menu_background, 0, 0, Fade(WHITE, 0.8f));
 
-        DrawText("Submerged Secrets 2", 100, 50, 40, RAYWHITE);
-        
-        Color color_start1 = (selecionado == MENU_START_GAME1) ? YELLOW : RAYWHITE;
-        DrawText("FASE 1", 150, 150, 30, color_start1);
-        
-        Color color_start2 = (selecionado == MENU_START_GAME2) ? YELLOW : RAYWHITE;
-        DrawText("FASE 2", 150, 190, 30, color_start2);
+        DrawTextEx(title_font, "Submerged Secrets 2", (Vector2){ (1200 - MeasureText("Submerged Secrets 2", 60)) / 2 - 50, 100 }, 60, 2, GOLD);
 
-        Color color_exit = (selecionado == MENU_EXIT) ? YELLOW : RAYWHITE;
-        DrawText("SAIR", 150, 270, 30, color_exit);
+        Color color_start1 = (selecionado == MENU_START_GAME1) ? ORANGE : BLACK;
+        DrawText("FASE 1", (1200 - MeasureText("FASE 1", 30)) / 2, 250, 30, color_start1);
+        
+        Color color_start2 = (selecionado == MENU_START_GAME2) ? ORANGE : BLACK;
+        DrawText("FASE 2", (1200 - MeasureText("FASE 2", 30)) / 2, 300, 30, color_start2);
+
+        Color color_creditos = (selecionado == POS_CREDITOS) ? ORANGE : BLACK;
+        DrawText("CREDITOS", (1200 - MeasureText("CREDITOS", 30)) / 2, 350, 30, color_creditos);
+
+        Color color_exit = (selecionado == MENU_EXIT) ? RED : BLACK;
+        DrawText("SAIR", (1200 - MeasureText("SAIR", 30)) / 2, 400, 30, color_exit);
 
     EndDrawing();
 
@@ -70,12 +81,14 @@ GameState run_menu() {
 int main(void) 
 {
     // Configurações e Inicialização
-    const int tela_comp = 626;
-    const int tela_altura = 398;
+    const int tela_comp = 1200;
+    const int tela_altura = 680;
     
     InitWindow(tela_comp, tela_altura, "Submerged Secrets 2");
+    SetExitKey(KEY_NULL); // O ESC não fecha mais a janela
 
-    menu_background = LoadTexture("DESENHOS/background_menu.jpg");
+    menu_background = LoadTexture("DESENHOS/teste.jpg");
+    title_font = LoadFont("FONTES/PERRYGOT.TTF");
 
     SetTargetFPS(60); 
 
@@ -115,6 +128,18 @@ int main(void)
                 EndDrawing();
             } break;
 
+            case STATE_CREDITOS:
+            {
+                if (IsKeyPressed(KEY_ESCAPE)) estado_atual = STATE_MENU;
+                
+                BeginDrawing();
+                    ClearBackground(BLACK);
+                    DrawText("CREDITOS", 100, 100, 30, RAYWHITE);
+                    DrawText("Desenvolvido por Daniel Naslavsky, Joelle Calado, Marcela Massa, Paulo Braz e Pedro Henrique Neves", 100, 150, 20, RAYWHITE);
+                    DrawText("ESC para voltar ao Menu", 100, 200, 20, RAYWHITE);
+                EndDrawing();
+            } break;
+
             case STATE_SAIR:
             {
                 // Isso fecha o loop e o programa
@@ -127,7 +152,7 @@ int main(void)
 
     exit_loop:
     UnloadTexture(menu_background); //Descarrega a tela
-    CloseWindow();       // Fecha o programa.
+    CloseWindow();      // Fecha o programa.
 
     return 0;
 }
