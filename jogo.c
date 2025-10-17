@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 
+
 static Texture2D menu_background = {0};
 static Font title_font = {0};
 static float creditosY = 680; // começa abaixo da tela (altura da tela)
@@ -78,7 +79,7 @@ GameState run_menu() {
         float brilho = (sin(tempo * 1.5f) + 1) / 2.0f; // valor entre 0 e 1
         DrawRectangle(0, 0, 1200, 680, Fade(SKYBLUE, brilho * 0.08f));
 
-        // Textos do menu
+        // Textos do men
         DrawTextEx(title_font, "Submerged Secrets 2", 
             (Vector2){ (1200 - MeasureText("Submerged Secrets 2", 60)) / 2 - 50, 100 }, 
             60, 2, GOLD);
@@ -238,4 +239,5 @@ int main(void)
     CloseWindow();      // Fecha o programa.
 
     return 0;
+
 }
