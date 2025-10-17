@@ -79,7 +79,7 @@ GameState run_menu() {
         float brilho = (sin(tempo * 1.5f) + 1) / 2.0f; // valor entre 0 e 1
         DrawRectangle(0, 0, 1200, 680, Fade(SKYBLUE, brilho * 0.08f));
 
-        // Textos do men
+        // Textos do menu
         DrawTextEx(title_font, "Submerged Secrets 2", 
             (Vector2){ (1200 - MeasureText("Submerged Secrets 2", 60)) / 2 - 50, 100 }, 
             60, 2, GOLD);
@@ -241,3 +241,4 @@ int main(void)
     return 0;
 
 }
+
