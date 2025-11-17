@@ -1,3 +1,4 @@
+#include <raylib.h>
 // Definição dos estados do jogo
 typedef enum {
     STATE_MENU,
