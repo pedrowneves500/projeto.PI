@@ -1,8 +1,9 @@
 #include "menu.h"
+#include "fase1.h"
 #include <raylib.h>
 #include <stdio.h>
 #include <math.h>
-
+//gcc -o jogo jogo.c menu.c fase1.c -lraylib -lopengl32 -lgdi32 -lwinmm -lm
 int main(void) 
 {
     // Configurações e Inicialização
@@ -32,13 +33,7 @@ int main(void)
             case STATE_FASE1:
             // Lógica da Fase 1
             {
-                if (IsKeyPressed(KEY_ESCAPE)) estado_atual = STATE_MENU;
-                
-                BeginDrawing();
-                    ClearBackground(DARKGRAY);
-                    DrawText("FASE 1", 100, 100, 30, GREEN);
-                    DrawText("ESC para voltar ao Menu", 100, 150, 20, RAYWHITE);
-                EndDrawing();
+                estado_atual = fase1();
             } break;
 
             case STATE_FASE2:
