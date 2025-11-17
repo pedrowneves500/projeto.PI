@@ -1,10 +1,12 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 #include "fase1.h"
 
 Celula labirinto[GRADE_COMP][GRADE_ALTURA];
 Posicao jogador;
+Posicao Objetivo;
 
 
 void InicializaLabirinto() {
@@ -63,22 +65,55 @@ void GeradorLabirinto(int x, int y) {
     }
 
 }
+void DesenhoVisaoJogador() {
 
-
-
-void DesenhoLabirinto() {
     for (int x = 0; x < GRADE_COMP; x++) {
-        for( int y = 0; y < GRADE_ALTURA; y++) {
-            int posicao_x = x * TAMANHO_CELULA;
-            int posicao_y = y * TAMANHO_CELULA;
+        for (int y = 0; y < GRADE_ALTURA; y++) {
+            
+            int dist_x = abs(x - jogador.x);
+            int dist_y = abs(y - jogador.y);
+            
 
-            if (labirinto[x][y].parede_norte) DrawLine(posicao_x, posicao_y,posicao_x + TAMANHO_CELULA, posicao_y,WHITE);
-            if (labirinto[x][y].parede_leste) DrawLine(posicao_x + TAMANHO_CELULA, posicao_y, posicao_x + TAMANHO_CELULA, posicao_y + TAMANHO_CELULA,WHITE);
-            if (labirinto[x][y].parede_sul) DrawLine(posicao_x, posicao_y + TAMANHO_CELULA,posicao_x + TAMANHO_CELULA, posicao_y + TAMANHO_CELULA,WHITE);
-            if (labirinto[x][y].parede_oeste) DrawLine(posicao_x, posicao_y,posicao_x, posicao_y + TAMANHO_CELULA,WHITE);
+            if (dist_x <= RAIO_LUZ && dist_y <= RAIO_LUZ) {
+                
+                // Célula visível: desenha as paredes
+                int posicao_x = x * TAMANHO_CELULA;
+                int posicao_y = y * TAMANHO_CELULA;
+                
+                if (labirinto[x][y].parede_norte) DrawLine(posicao_x, posicao_y, posicao_x + TAMANHO_CELULA, posicao_y, WHITE);
+                if (labirinto[x][y].parede_leste) DrawLine(posicao_x + TAMANHO_CELULA, posicao_y, posicao_x + TAMANHO_CELULA, posicao_y + TAMANHO_CELULA, WHITE);
+                if (labirinto[x][y].parede_sul) DrawLine(posicao_x, posicao_y + TAMANHO_CELULA, posicao_x + TAMANHO_CELULA, posicao_y + TAMANHO_CELULA, WHITE);
+                if (labirinto[x][y].parede_oeste) DrawLine(posicao_x, posicao_y, posicao_x, posicao_y + TAMANHO_CELULA, WHITE);
 
+                if (x == Objetivo.x && y == Objetivo.y) {
+                    DrawRectangle(Objetivo.x * TAMANHO_CELULA + 2, Objetivo.y * TAMANHO_CELULA + 2, TAMANHO_CELULA - 4, TAMANHO_CELULA - 4, BLUE);
+                }
+            }
         }
     }
+    
+}
+
+void DesenhoJogador() {
+    DrawRectangle(jogador.x  * TAMANHO_CELULA + 2, jogador.y * TAMANHO_CELULA +2, TAMANHO_CELULA - 4, TAMANHO_CELULA - 4, WHITE);
+}
+
+void DesenhoObjetivo() {
+    DrawRectangle(Objetivo.x *TAMANHO_CELULA + 2, Objetivo.y * TAMANHO_CELULA + 2, TAMANHO_CELULA - 4, TAMANHO_CELULA - 4, BLUE);
+}
+
+void MoverJogador(int dx, int dy) {
+    int novoX = jogador.x + dx;
+    int novoY = jogador.y + dy;
+
+    if (novoX < 0 || novoX >= GRADE_COMP || novoY < 0 || novoY >= GRADE_ALTURA) return;
+    if (dx == -1 && labirinto[jogador.x][jogador.y].parede_oeste) return;
+    if (dx == 1 && labirinto[jogador.x][jogador.y].parede_leste) return;
+    if (dy == 1 && labirinto[jogador.x][jogador.y].parede_sul) return;
+    if (dy == -1 && labirinto[jogador.x][jogador.y].parede_norte) return;
+
+    jogador.x = novoX;
+    jogador.y = novoY;
 }
 
 int fase1() {
@@ -90,15 +125,23 @@ int fase1() {
         jogador.x = 0;
         jogador.y = 0;
         iniciado = true;
+        Objetivo.x = GRADE_COMP -1;
+        Objetivo.y = GRADE_ALTURA - 1;
     }
     if (IsKeyPressed(KEY_ESCAPE)) {
         return STATE_MENU;
     }
+    if (IsKeyPressed(KEY_RIGHT)) MoverJogador(1,0);
+    if (IsKeyPressed(KEY_LEFT)) MoverJogador(-1,0);
+    if (IsKeyPressed(KEY_UP)) MoverJogador(0,-1);
+    if (IsKeyPressed(KEY_DOWN)) MoverJogador(0,1);
+
     // Desenho da fase
     BeginDrawing();
-        ClearBackground(DARKGRAY);
-        DesenhoLabirinto();
-        // Desenhar jogador, itens, etc.
+        ClearBackground(BLACK);
+        DesenhoVisaoJogador();
+        DesenhoJogador();
+        DesenhoObjetivo();
     EndDrawing();
 
     return STATE_FASE1;

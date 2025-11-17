@@ -5,7 +5,7 @@
 #define TAMANHO_CELULA 50
 #define GRADE_COMP (TELA_COMP/TAMANHO_CELULA)
 #define GRADE_ALTURA (TELA_ALTURA / TAMANHO_CELULA)
-#define RAIO_LUZ 5
+#define RAIO_LUZ 3
 
 typedef struct {
     int visitado;
@@ -18,7 +18,7 @@ typedef struct {
 
 extern Celula labirinto[GRADE_COMP][GRADE_ALTURA];
 extern Posicao jogador;
-
+extern Posicao Objetivo;
 
 void InicializaLabirinto(void);
 int fase1(void);
