@@ -1,6 +1,4 @@
-
 // Definição dos estados do jogo
-
 typedef enum {
     STATE_MENU,
     STATE_FASE1,

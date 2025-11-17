@@ -1,7 +1,7 @@
+#include "menu.h"
 #include <raylib.h>
 #include <stdio.h>
 #include <math.h>
-#include "menu.h"
 
 int main(void) 
 {
@@ -14,7 +14,7 @@ int main(void)
 
     menu_background = LoadTexture("data/teste.jpg");
     title_font = LoadFont("data/PERRYGOT.TTF");
-    
+
     SetTargetFPS(60); 
 
     GameState estado_atual = STATE_MENU;

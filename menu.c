@@ -1,10 +1,11 @@
 #include "menu.h"
 #include <raylib.h>
+#include <math.h>
 
 int selecionado = MENU_START_GAME1;
-static Texture2D menu_background = {0};
-static Font title_font = {0};
-static float creditosY = 680; // começa abaixo da tela (altura da tela)
+Texture2D menu_background = {0};
+Font title_font = {0};
+float creditosY = 680; // começa abaixo da tela (altura da tela)
 
 GameState run_menu() {
     
@@ -35,7 +36,7 @@ GameState run_menu() {
     }
 
     
-    static float tempo = 0.0f;
+    float tempo = 0.0f;
     tempo += GetFrameTime(); // atualiza tempo contínuo
 
     // Movimento ondulante 
