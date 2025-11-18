@@ -1,4 +1,4 @@
-#include <raylib.h>
+#include "raylib.h"
 #ifndef MENU_H
 #define MENU_H
 // Definição dos estados do jogo
@@ -16,7 +16,8 @@ typedef enum {
     MENU_START_GAME2,
     POS_CREDITOS,
     MENU_EXIT,
-    NUM_MENU_OPTIONS
+    NUM_MENU_OPTIONS,
+    STATE_GAME_OVER
 } MenuOptions;
 
 GameState run_menu(void);
@@ -24,5 +25,8 @@ GameState run_menu(void);
 extern Texture2D menu_background;
 extern Font title_font;
 extern float creditosY;
+
+
+int creditos();
 
 #endif
