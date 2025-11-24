@@ -12,8 +12,8 @@
 #define MAX_VISAO 5
 #define VELOCIDADE_JOGADOR 300.0f 
 #define VELOCIDADE_TUBARAO_CONTINUO 200.0f
-#define TELA_COMP 1500
-#define TELA_ALTURA 850 
+#define TELA_COMP 1300
+#define TELA_ALTURA 650 
 #define META_CRISTAIS 3
 #define META_MOEDAS 5
 #define META_CHAVES 3
@@ -77,6 +77,9 @@ extern Texture2D textura_tubarao;
 extern Texture2D textura_moeda;
 extern Texture2D textura_cristal;
 extern Texture2D textura_chave;
+extern Sound som_coleta;
+extern Sound som_game_over;
+extern Sound som_game_win;
 
 //PROTÓTIPOS DE FUNÇÃO
 void InicializaLabirinto();

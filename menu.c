@@ -152,7 +152,7 @@ GameState creditos() {
 }
 
 GameState gameover() {
-    if (IsKeyPressed(KEY_ENTER)) {
+    if (IsKeyReleased(KEY_ENTER)) {
         return STATE_MENU;
     }
     // Desenho

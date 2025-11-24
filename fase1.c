@@ -120,7 +120,6 @@ void DesenhoVisaoJogador() {
 
                 if (labirinto[x][y].item != ITEM_NENHUM) {
                     Texture2D textura_desenho = {0};
-                    float raioItem = TAMANHO_CELULA / 3.0f;
                     
                     switch (labirinto[x][y].item) {
                         case ITEM_MOEDA:
@@ -321,6 +320,8 @@ void ColetaItem() {
     TipoItem itemColetado = labirinto[x][y].item;
 
     if (itemColetado != ITEM_NENHUM) {
+        PlaySound(som_coleta);
+
         switch (itemColetado) {
             case ITEM_MOEDA: placar.moedas++; break;
             case ITEM_CRISTAL: placar.cristais++; break;
@@ -491,6 +492,7 @@ int fase1() {
 
     if (jogador.x == Objetivo.x && jogador.y == Objetivo.y && meta_coletada) {
         iniciado = false;
+        PlaySound(som_game_win);
         return STATE_MENU;
     }
 
@@ -498,6 +500,8 @@ int fase1() {
     tubarao.y = (int)round(posicaoDesenhoTubarao.y / TAMANHO_CELULA);
 
     if (VerificarColisao()) {
+        iniciado = false;
+        PlaySound(som_game_over);
         //se houver colisão, retorna o novo estado de gameover
         return STATE_GAMEOVER; 
     }

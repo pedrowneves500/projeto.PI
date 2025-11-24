@@ -10,6 +10,10 @@ extern Texture2D menu_background;
 extern Font title_font;
 extern Texture2D fase1_fundo;
 
+Sound som_coleta = {0};
+Sound som_game_over = {0};
+Sound som_game_win = {0};
+
 // Comando de compilação para referência:
 // gcc -o jogo jogo.c menu.c fase1.c -lraylib -lopengl32 -lgdi32 -lwinmm -lm
 
@@ -27,8 +31,16 @@ int main(void)
     // O recurso de música é carregado no início.
     Music musica_menu = LoadMusicStream("audios/musica_menu.mp3");
     SetMusicVolume(musica_menu, 1.0f); 
+
+    // Audios da fase 1
     Music musica_fase1 = LoadMusicStream("audios/musica_fase1.mp3");
     SetMusicVolume(musica_fase1, 0.8f);
+    Sound som_coleta = LoadSound("audios/coletar.mp3");
+    SetSoundVolume(som_coleta, 0.7f);
+    Sound som_game_over = LoadSound("audios/gameover1.mp3");
+    SetSoundVolume(som_game_over, 0.7f);
+    Sound som_game_win = LoadSound("audios/gamewin1.mp3");
+    SetSoundVolume(som_game_win, 0.7f);
 
     menu_background = LoadTexture("data/FUNDO_MENU.jpg");
     title_font = LoadFont("data/PERRYGOT.TTF"); 
@@ -114,6 +126,9 @@ int main(void)
     UnloadTexture(textura_chave);
     UnloadMusicStream(musica_menu);
     UnloadMusicStream(musica_fase1); 
+    UnloadSound(som_coleta);
+    UnloadSound(som_game_over);
+    UnloadSound(som_game_win);
 
     CloseAudioDevice(); 
 
