@@ -7,7 +7,8 @@ typedef enum {
     STATE_FASE1,
     STATE_FASE2,
     STATE_CREDITOS,
-    STATE_SAIR
+    STATE_SAIR,
+    STATE_GAMEOVER
 } GameState;
 
 // Definição das opções do menu
@@ -20,9 +21,10 @@ typedef enum {
 } MenuOptions;
 
 GameState run_menu(void);
-
+GameState creditos();
+GameState gameover();
 extern Texture2D menu_background;
 extern Font title_font;
 extern float creditosY;
-
+extern Texture2D fundo_fase1;
 #endif

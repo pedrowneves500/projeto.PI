@@ -7,6 +7,7 @@
 extern float creditosY;
 extern Texture2D menu_background;
 extern Font title_font;
+extern Texture2D fase1_fundo;
 
 // Comando de compilação para referência:
 // gcc -o jogo jogo.c menu.c fase1.c -lraylib -lopengl32 -lgdi32 -lwinmm -lm
@@ -14,30 +15,30 @@ extern Font title_font;
 int main(void) 
 {
     // Configurações e Inicialização
-    const int tela_comp = 1200;
-    const int tela_altura = 680;
+    const int tela_comp = TELA_COMP;
+    const int tela_altura = TELA_ALTURA;
     
     InitWindow(tela_comp, tela_altura, "Submerged Secrets 2");
     SetExitKey(KEY_NULL);
 
     // INICIALIZAÇÃO DE ÁUDIO E CARREGAMENTO
     InitAudioDevice(); 
-    
     // O recurso de música é carregado no início.
     Music musica_menu = LoadMusicStream("audios/musica_menu.mp3");
     SetMusicVolume(musica_menu, 1.0f); 
+    Music musica_fase1 = LoadMusicStream("audios/musica_fase1.mp3");
+    SetMusicVolume(musica_fase1, 0.8f);
 
-    menu_background = LoadTexture("data/teste.jpg");
-    title_font = LoadFont("data/PERRYGOT.TTF");
-
+    menu_background = LoadTexture("data/FUNDO_MENU.jpg");
+    title_font = LoadFont("data/PERRYGOT.TTF"); 
     SetTargetFPS(60); 
-
+    
     GameState estado_atual = STATE_MENU;
     
     // Loop Principal do Jogo
     while (!WindowShouldClose())
     {
-
+        UpdateMusicStream(musica_menu);
         switch (estado_atual)
         {
             case STATE_MENU:
@@ -45,12 +46,10 @@ int main(void)
                 if (!IsMusicStreamPlaying(musica_menu)) {
                     PlayMusicStream(musica_menu);
                 }
-                
-                UpdateMusicStream(musica_menu);
 
                 GameState proximo_estado = run_menu(); 
                 
-                if (proximo_estado != STATE_MENU && proximo_estado != STATE_SAIR) {
+                if (proximo_estado != STATE_MENU && proximo_estado != STATE_SAIR && proximo_estado != STATE_CREDITOS) {
                     StopMusicStream(musica_menu);
                 }
                 
@@ -60,7 +59,19 @@ int main(void)
             
             case STATE_FASE1:
             {
-                estado_atual = fase1();
+                if (!IsMusicStreamPlaying(musica_fase1)) {
+                PlayMusicStream(musica_fase1);
+                }
+                
+                UpdateMusicStream(musica_fase1); 
+
+                GameState proximo_estado = fase1();
+
+                if (proximo_estado != STATE_FASE1) {
+                    StopMusicStream(musica_fase1);
+                }
+
+                estado_atual = proximo_estado;
             } break;
 
             case STATE_FASE2:
@@ -76,94 +87,34 @@ int main(void)
 
             case STATE_CREDITOS:
             {
-                if (IsKeyPressed(KEY_ESCAPE)) {
-                    estado_atual = STATE_MENU;
-                    creditosY = 680; // reinicia a posição da variável 
-                }
-
-                static float tempoCreditos = 0.0f;
-                tempoCreditos += GetFrameTime();
-
-                // Velocidade de subida dos créditos
-                creditosY -= 40 * GetFrameTime(); 
-
-                const int qtd_nomes = 5;
-                const float espaco_entre = 50;
-                float altura_total_creditos = qtd_nomes * espaco_entre;
-
-                // reinicia a posição para começar de novo por baixo.
-                if (creditosY + altura_total_creditos < 5)
-                {
-                    creditosY = 680; // Reseta para a posição inicial
-                }
-
-                // Fundo animado ondulante 
-                float waveX = sin(tempoCreditos * 0.3f) * 3.0f;
-                float waveY = cos(tempoCreditos * 0.2f) * 2.0f;
-                Rectangle src = { waveX, waveY, menu_background.width, menu_background.height };
-
-                BeginDrawing();
-                    ClearBackground(BLACK);
-
-                    // Fundo animado 
-                    DrawTextureRec(menu_background, src, (Vector2){0, 0}, Fade(WHITE, 0.8f));
-                    DrawRectangle(0, 0, 1200, 680, Fade(BLUE, 0.15f)); //filtro azul
-                    float brilho = (sin(tempoCreditos * 1.5f) + 1) / 2.0f;
-                    DrawRectangle(0, 0, 1200, 680, Fade(SKYBLUE, brilho * 0.08f));
-
-                    // Pequenas bolhas subindo 
-                    for(int i = 0; i < 20; i++){
-                        float bolhaX = (i * 60 + fmod(tempoCreditos*20, 60)); 
-                        float bolhaY = fmod(-i * 50 + tempoCreditos*30, 680); 
-                        DrawCircle(bolhaX, 680 - bolhaY, 5, Fade(RAYWHITE, 0.15f));
-                    }
-
-                    // Título dos créditos 
-                    DrawText("CREDITOS", 100, 50, 40, GOLD);
-
-                    // Lista de nomes 
-                    const char* nomes[] = {
-                        "Daniel Naslavsky",
-                        "Joelle Calado",
-                        "Marcela Massa",
-                        "Paulo Braz",
-                        "Pedro Henrique Neves"
-                    };
-
-                    for(int i = 0; i < qtd_nomes; i++){
-                        float y = creditosY + i * espaco_entre;
-
-                        // Efeitos visuais dos nomes 
-                        float dist = (y - 340)/340.0f;
-                        float escala = 1.0f - 0.05f * fabs(dist);
-                        float alpha = 1.0f - 0.15f * fabs(dist);
-                        float offsetX = sin(tempoCreditos * 0.5f + i) * 40;
-
-                        DrawText(nomes[i],
-                                 (1200 - MeasureText(nomes[i], 30 * escala))/2 + offsetX,
-                                 y,
-                                 30 * escala,
-                                 Fade(RAYWHITE, alpha));
-                    }
-
-                EndDrawing();
+                estado_atual = creditos();
             } break;
             
+            case STATE_GAMEOVER:
+            {
+                estado_atual = gameover();
+            } break;
+
             case STATE_SAIR:
                 goto exit_loop;
                 break;
-                
+            
             default: break;
         }
     }
 
     exit_loop:
     UnloadTexture(menu_background); 
+    UnloadTexture(fundo_fase1);
+    UnloadTexture(textura_jogador);
+    UnloadTexture(textura_tubarao);
+    UnloadTexture(textura_moeda);   
+    UnloadTexture(textura_cristal);  
+    UnloadTexture(textura_chave);
+    UnloadMusicStream(musica_menu);
+    UnloadMusicStream(musica_fase1); 
 
-
-    UnloadMusicStream(musica_menu); 
     CloseAudioDevice(); 
-
 
     CloseWindow();
 

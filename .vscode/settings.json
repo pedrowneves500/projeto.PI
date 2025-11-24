@@ -4,6 +4,7 @@
         "stdlib.h": "c",
         "menu.h": "c",
         "math.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "fase1.h": "c"
     }
 }
