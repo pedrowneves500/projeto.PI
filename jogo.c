@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 
+
 extern float creditosY;
 extern Texture2D menu_background;
 extern Font title_font;

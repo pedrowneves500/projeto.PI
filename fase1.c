@@ -6,6 +6,7 @@
 #include "fase1.h"
 #include "menu.h"
 
+// --- VARIÁVEIS GLOBAIS ---
 Celula labirinto[GRADE_COMP][GRADE_ALTURA];
 Posicao jogador;
 Posicao Objetivo;
@@ -47,6 +48,7 @@ void InicializaLabirinto() {
             labirinto[i][j].parede_sul = true;
             labirinto[i][j].parede_oeste = true;
             labirinto[i][j].parede_leste = true;
+            labirinto[i][j].item = ITEM_NENHUM; 
         }
     }
 }
@@ -68,11 +70,11 @@ void GeradorLabirinto(int x, int y) {
         int nx = x;
         int ny = y;
         if (direcoes[i] == 0) {
-            ny = y - 1;    //Norte
+            ny = y - 1; 
         } else if (direcoes[i] == 1) {
-            nx = x + 1;    //Leste
+            nx = x + 1; 
         } else if (direcoes[i] == 2) {
-            ny = y + 1;    //Sul
+            ny = y + 1; 
         } else if (direcoes[i] == 3) {
             nx = x - 1;    //Oeste    
         }
@@ -109,6 +111,8 @@ void DesenhoVisaoJogador() {
             int dist_x = abs(x - jogador.x);
             int dist_y = abs(y - jogador.y);
 
+            // Se você usou o teste "if (true)" para ver todos os itens, 
+            // volte para esta condição:
             if (dist_x <= RAIO_LUZ && dist_y <= RAIO_LUZ) {
                 // Célula visível: desenha as paredes
                 int posicao_x = x * TAMANHO_CELULA;
@@ -357,6 +361,14 @@ void DesenhaPlacar() {
 int fase1() {
     // Inicializa labirinto só uma vez
     static bool iniciado = false;
+    
+    // 1. Inicializa a Janela com as dimensões da GRADE
+    if (!IsWindowReady()) {
+        // Usa SCREEN_WIDTH/HEIGHT definidas em fase1.h (Grade * Célula)
+        InitWindow(TELA_COMP, TELA_ALTURA, "Seu Labirinto com Placar");
+        SetTargetFPS(60); 
+    }    
+    //Inicialização da Lógica do Jogo
     if (!iniciado) {
         CarregarRecursosFase1();
         InicializaLabirinto();
@@ -397,6 +409,8 @@ int fase1() {
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
+        // Assume que você quer fechar a janela ao sair da fase
+        if (IsWindowReady()) CloseWindow(); 
         return STATE_MENU;
     }
 
@@ -504,6 +518,7 @@ int fase1() {
         DesenhaPlacar();
         
     EndDrawing();
+    
     return STATE_FASE1;
 
 }
