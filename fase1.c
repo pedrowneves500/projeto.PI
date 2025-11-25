@@ -34,7 +34,7 @@ void CarregarRecursosFase1() {
 }
 
 bool VerificarColisao() {
-    // Colisão ocorre se o jogador e o tubarão ocuparem a mesma célula de grade (posições lógicas)
+    // Colisão ocorre se o jogador e o tubarão ocuparem a mesma posição
     if (jogador.x == tubarao.x && jogador.y == tubarao.y) {
         return true;
     }
@@ -111,8 +111,6 @@ void DesenhoVisaoJogador() {
             int dist_x = abs(x - jogador.x);
             int dist_y = abs(y - jogador.y);
 
-            // Se você usou o teste "if (true)" para ver todos os itens, 
-            // volte para esta condição:
             if (dist_x <= RAIO_LUZ && dist_y <= RAIO_LUZ) {
                 // Célula visível: desenha as paredes
                 int posicao_x = x * TAMANHO_CELULA;
@@ -135,7 +133,7 @@ void DesenhoVisaoJogador() {
                     }
                     if (textura_desenho.id != 0) { // Desenha se a textura carregou
                         
-                        const float FATOR_ESCALA = 0.8f; // Item um pouco menor que a célula (ajuste aqui)
+                        const float FATOR_ESCALA = 0.8f; // Item um pouco menor que a célula 
                         
                         float largura_desenho = (float)TAMANHO_CELULA * FATOR_ESCALA;
                         float altura_desenho = (float)TAMANHO_CELULA * FATOR_ESCALA;
@@ -175,9 +173,9 @@ void DesenhoNevoa() {
             float dist_x_float = (float)abs(x - jogador.x);
             float dist_y_float = (float)abs(y - jogador.y);
             float distancia = sqrtf(dist_x_float * dist_x_float + dist_y_float * dist_y_float);
-            //Definimos o ponto onde a névoa começa
-            const float RAIO_VISIVEL = (float)RAIO_LUZ; // Ex: 3.0
-            const float RAIO_MAXIMO = (float) MAX_VISAO; // Ex: 5.0
+            // ponto onde a névoa começa
+            const float RAIO_VISIVEL = (float)RAIO_LUZ; 
+            const float RAIO_MAXIMO = (float) MAX_VISAO; 
             float alpha = 0.0f;
 
             if (distancia >= RAIO_MAXIMO) {
@@ -340,9 +338,9 @@ void DesenhaPlacar() {
     int fontSize = 20;
     
     //Cálculo da Posição (Canto Superior Direito)
-    int comprimento_tela = (int)TELA_COMP; // Use a constante de largura da sua tela
-    int inicioX = comprimento_tela - LARGURA_PLACAR - 10; // 10px de margem na direita
-    int textoX = inicioX + 10; // 10px de margem interna
+    int comprimento_tela = (int)TELA_COMP;
+    int inicioX = comprimento_tela - LARGURA_PLACAR - 10;
+    int textoX = inicioX + 10;
 
     //Fundo do placar
     DrawRectangle(inicioX, 0, LARGURA_PLACAR, 100, Fade(DARKGRAY, 0.7f)); 
@@ -365,7 +363,6 @@ int fase1() {
     
     // 1. Inicializa a Janela com as dimensões da GRADE
     if (!IsWindowReady()) {
-        // Usa SCREEN_WIDTH/HEIGHT definidas em fase1.h (Grade * Célula)
         InitWindow(TELA_COMP, TELA_ALTURA, "Seu Labirinto com Placar");
         SetTargetFPS(60); 
     }    
@@ -386,7 +383,7 @@ int fase1() {
         posicaoDesenhoTubarao.x = tubarao.x * TAMANHO_CELULA;
         posicaoDesenhoTubarao.y = tubarao.y * TAMANHO_CELULA;
 
-        //Definimos a velocidade inicial para começar a se mover (ex: para a direita e para baixo)
+        //Definimos a velocidade inicial para começar a se mover 
 
         velocidadeDesenhoTubarao.x = VELOCIDADE_TUBARAO_CONTINUO;
 
@@ -410,7 +407,6 @@ int fase1() {
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
-        // Assume que você quer fechar a janela ao sair da fase
         if (IsWindowReady()) CloseWindow(); 
         return STATE_MENU;
     }
