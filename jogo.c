@@ -1,5 +1,6 @@
 #include "menu.h"
 #include "fase1.h"
+#include "fase2.h"
 #include "raylib.h"
 #include <stdio.h>
 #include <math.h>
@@ -88,7 +89,7 @@ int main(void)
             } break;
 
             case STATE_FASE2:
-            {
+            {       fase2();
                 if (IsKeyPressed(KEY_ESCAPE)) estado_atual = STATE_MENU;
                 
                 BeginDrawing();
