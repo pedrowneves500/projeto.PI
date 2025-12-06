@@ -2,13 +2,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "raylib.h" 
+
+// --- ESTRUTURAS DE ÁUDIO ---
+static Music musica_fundo;
+static Sound som_explosao_terreno; // Explosão na areia (cratera)
+static Sound som_explosao_submarino; // Acerto direto
 
 // --- ESTADOS DO TURNO ---
 typedef enum {
-    ETAPA_MIRAR,    
-    ETAPA_CARREGAR, 
-    ETAPA_DISPARO,  
-    ETAPA_FIM       
+    ETAPA_MIRAR,
+    ETAPA_CARREGAR,
+    ETAPA_DISPARO,
+    ETAPA_FIM
 } EtapaTurno;
 
 // --- VARIÁVEIS ESTÁTICAS ---
@@ -17,23 +23,48 @@ static ColunaAreia terreno[MAX_COLUNAS_TERRENO];
 static Torpedo torpedo = { 0 };
 static ExplosaoAgua explosao = { 0 };
 
-static int jogadorDaVez = 0; 
+static int jogadorDaVez = 0;
 static EtapaTurno etapaAtual = ETAPA_MIRAR;
-static int direcaoOscilacao = 1; 
+static int direcaoOscilacao = 1;
 static int vencedor = 0;
+
+// --- FUNÇÕES DE CONTROLE DE ÁUDIO ---
+
+static void CarregarAudios() {
+    if (!IsAudioDeviceReady()) {
+        InitAudioDevice(); // Garante que o dispositivo de áudio está ativo
+    }
+
+    // Carregar a Música de Fundo (MP3, OGG, etc.)
+    // Usamos LoadMusicStream para arquivos grandes
+    musica_fundo = LoadMusicStream("audios/musica_fase2.mp3");
+    SetMusicVolume(musica_fundo, 0.4f); // Volume mais baixo para BGM
+
+    // Carregar Efeitos Sonoros (WAV é geralmente preferível para SFX)
+    som_explosao_terreno = LoadSound("audios/explosao_fase2.mp3"); // Pode ser o mesmo arquivo para ambos
+    som_explosao_submarino = LoadSound("audios/game_over2.mp3"); 
+    SetSoundVolume(som_explosao_submarino, 0.8f);
+}
+
+static void DescarregarAudios() {
+    UnloadMusicStream(musica_fundo);
+    UnloadSound(som_explosao_terreno);
+    UnloadSound(som_explosao_submarino);
+    CloseAudioDevice();
+}
 
 // --- FUNÇÕES AUXILIARES ---
 
 static void GerarTerreno() {
     float larguraColuna = (float)LARGURA_TELA_FASE2 / MAX_COLUNAS_TERRENO;
-    int alturaAtual = ALTURA_TELA_FASE2 * 0.30; 
+    int alturaAtual = ALTURA_TELA_FASE2 * 0.30;
     
     for (int i = 0; i < MAX_COLUNAS_TERRENO; i++) {
         terreno[i].retangulo.x = i * larguraColuna;
-        terreno[i].retangulo.width = larguraColuna + 1; 
+        terreno[i].retangulo.width = larguraColuna + 1;
         
         // Geração de Dunas
-        int variacao = GetRandomValue(-10, 10); // Suavizado
+        int variacao = GetRandomValue(-10, 10);
         alturaAtual += variacao;
 
         // Limites
@@ -43,7 +74,7 @@ static void GerarTerreno() {
         terreno[i].retangulo.height = alturaAtual;
         terreno[i].retangulo.y = ALTURA_TELA_FASE2 - alturaAtual;
         
-        terreno[i].cor = (Color){ 235, 200, 100, 255 }; 
+        terreno[i].cor = (Color){ 235, 200, 100, 255 };
     }
 }
 
@@ -51,11 +82,11 @@ static void InicializarSubmarinos() {
     // Player 1
     subs[0].ativo = true;
     subs[0].isPlayer1 = true;
-    subs[0].angulo = 0; 
+    subs[0].angulo = 0;
     subs[0].forca = 0;
     subs[0].saude = 100;
-    subs[0].cor = YELLOW;
-    subs[0].temDisparoAnterior = false; // Começa sem memória
+    subs[0].cor = BLUE;
+    subs[0].temDisparoAnterior = false;
     
     int idx1 = GetRandomValue(15, 35);
     subs[0].posicao.x = terreno[idx1].retangulo.x + (terreno[idx1].retangulo.width / 2);
@@ -64,11 +95,11 @@ static void InicializarSubmarinos() {
     // Player 2
     subs[1].ativo = true;
     subs[1].isPlayer1 = false;
-    subs[1].angulo = 180; 
+    subs[1].angulo = 180;
     subs[1].forca = 0;
     subs[1].saude = 100;
     subs[1].cor = RED;
-    subs[1].temDisparoAnterior = false; // Começa sem memória
+    subs[1].temDisparoAnterior = false;
     
     int idx2 = GetRandomValue(MAX_COLUNAS_TERRENO - 35, MAX_COLUNAS_TERRENO - 15);
     subs[1].posicao.x = terreno[idx2].retangulo.x + (terreno[idx2].retangulo.width / 2);
@@ -79,7 +110,7 @@ static void InicializarSubmarinos() {
     explosao.ativo = false;
     etapaAtual = ETAPA_MIRAR;
     jogadorDaVez = 0;
-    direcaoOscilacao = 1; 
+    direcaoOscilacao = 1;
     vencedor = 0;
 }
 
@@ -96,30 +127,37 @@ static void DispararTorpedo() {
     torpedo.posicao.y = subs[jogadorDaVez].posicao.y - sin(radianos) * offsetDisparo;
 
     torpedo.ativo = true;
-    torpedo.raio = 5; 
+    torpedo.raio = 5;
     etapaAtual = ETAPA_DISPARO;
 
-    float fatorPotencia = 0.20f; 
+    float fatorPotencia = 0.20f;
     torpedo.velocidade.x = cos(radianos) * subs[jogadorDaVez].forca * fatorPotencia;
-    torpedo.velocidade.y = -sin(radianos) * subs[jogadorDaVez].forca * fatorPotencia; 
+    torpedo.velocidade.y = -sin(radianos) * subs[jogadorDaVez].forca * fatorPotencia;
 }
 
 static void AtualizarLogica() {
+    
+    // --- ATUALIZAÇÃO DA MÚSICA DE FUNDO (Obrigatório para streaming) ---
+    UpdateMusicStream(musica_fundo);
+    if (!IsMusicStreamPlaying(musica_fundo)) {
+        PlayMusicStream(musica_fundo); // Loop da música
+    }
+
     // --- 1. OSCILAÇÃO ---
     if (etapaAtual == ETAPA_MIRAR) {
         float velocidadeAngular = 1.0f;
-        if (jogadorDaVez == 0) { 
+        if (jogadorDaVez == 0) {
             subs[0].angulo += (velocidadeAngular * direcaoOscilacao);
             if (subs[0].angulo >= 90) { subs[0].angulo = 90; direcaoOscilacao = -1; }
             if (subs[0].angulo <= 0)  { subs[0].angulo = 0;  direcaoOscilacao = 1; }
-        } else { 
+        } else {
             subs[1].angulo -= (velocidadeAngular * direcaoOscilacao);
             if (subs[1].angulo <= 90)  { subs[1].angulo = 90;  direcaoOscilacao = -1; }
             if (subs[1].angulo >= 180) { subs[1].angulo = 180; direcaoOscilacao = 1; }
         }
     }
     else if (etapaAtual == ETAPA_CARREGAR) {
-        float velocidadeForca = 0.8f; 
+        float velocidadeForca = 0.8f;
         subs[jogadorDaVez].forca += (velocidadeForca * direcaoOscilacao);
         if (subs[jogadorDaVez].forca >= 100) { subs[jogadorDaVez].forca = 100; direcaoOscilacao = -1; }
         if (subs[jogadorDaVez].forca <= 0)   { subs[jogadorDaVez].forca = 0;   direcaoOscilacao = 1; }
@@ -155,6 +193,9 @@ static void AtualizarLogica() {
 
             Rectangle recSub = { subs[i].posicao.x - 20, subs[i].posicao.y - 10, 40, 20 };
             if (CheckCollisionCircleRec(torpedo.posicao, torpedo.raio, recSub)) {
+                
+                PlaySound(som_explosao_submarino);
+                
                 colidiu = true;
                 explosao.posicao = subs[i].posicao;
                 explosao.ativo = true;
@@ -168,10 +209,12 @@ static void AtualizarLogica() {
 
         if (colidiu && etapaAtual != ETAPA_FIM) {
             
-            // --- TRATAMENTO DA DESTRUIÇÃO ---
+            // --- TRATAMENTO DA DESTRUIÇÃO (Areia) ---
             if (acertouChao) {
+                
+                PlaySound(som_explosao_terreno);
+
                 // TRUQUE IMPORTANTE: Avança a explosão para DENTRO da areia
-                // Multiplicamos a velocidade para projetar o ponto de impacto mais fundo
                 explosao.posicao.x = torpedo.posicao.x + (torpedo.velocidade.x * 5.0f);
                 explosao.posicao.y = torpedo.posicao.y + (torpedo.velocidade.y * 5.0f);
                 
@@ -221,6 +264,18 @@ static void DesenharCena() {
         DrawRectangleRec(terreno[i].retangulo, terreno[i].cor);
     }
 
+    DrawText("JOGADOR 1 (BLUE)", 20, ALTURA_TELA_FASE2 - 45, 18, BLUE); 
+    DrawText("Aperte [SPACE]", 20, ALTURA_TELA_FASE2 - 25, 18, WHITE);
+    
+    // Jogador 2 (Direita)
+    const char* texto2 = "JOGADOR 2 (RED)";
+    int larguraTexto2 = MeasureText(texto2, 18);
+
+    DrawText(texto2, LARGURA_TELA_FASE2 - larguraTexto2 - 20, ALTURA_TELA_FASE2 - 45, 18, RED);
+
+    DrawText("Aperte [ENTER]", LARGURA_TELA_FASE2 - MeasureText("Aperte [ENTER]", 18) - 20, ALTURA_TELA_FASE2 - 25, 18, WHITE);
+    // ------------------------------------------
+
     // 2. Submarinos
     for (int i = 0; i < 2; i++) {
         if (!subs[i].ativo) continue;
@@ -230,21 +285,13 @@ static void DesenharCena() {
 
         // Se tiver tiro anterior, desenha a SETA FANTASMA (Transparente)
         if (subs[i].temDisparoAnterior) {
-             float radGhost = subs[i].ultimoAngulo * DEG2RAD;
-             Vector2 centro = subs[i].posicao;
-             // Seta menor e transparente
-             Vector2 pontaGhost = { centro.x + cos(radGhost) * 40, centro.y - sin(radGhost) * 40 };
-             
-             // Desenha linha fantasma
-             DrawLineEx(centro, pontaGhost, 2, Fade(WHITE, 0.3f));
-             
-             // Opcional: Desenha barra fantasma
-             /*
-             if (i == jogadorDaVez && etapaAtual == ETAPA_CARREGAR) {
-                 // Pode desenhar um marquinha na barra indicando a força anterior
-                 // (Fica um pouco complexo visualmente, mantive só a seta por enquanto)
-             }
-             */
+            float radGhost = subs[i].ultimoAngulo * DEG2RAD;
+            Vector2 centro = subs[i].posicao;
+            // Seta menor e transparente
+            Vector2 pontaGhost = { centro.x + cos(radGhost) * 40, centro.y - sin(radGhost) * 40 };
+            
+            // Desenha linha fantasma
+            DrawLineEx(centro, pontaGhost, 2, Fade(WHITE, 0.3f));
         }
 
         // Se for a vez do jogador: Seta Real e Barra
@@ -263,8 +310,8 @@ static void DesenharCena() {
                 
                 // Marca da força anterior na barra atual (Opcional, mas útil)
                 if (subs[i].temDisparoAnterior) {
-                     float xMark = xBarra + ((float)subs[i].ultimaForca/100 * 60);
-                     DrawLine(xMark, yBarra - 2, xMark, yBarra + 10, Fade(WHITE, 0.5f));
+                    float xMark = xBarra + ((float)subs[i].ultimaForca/100 * 60);
+                    DrawLine(xMark, yBarra - 2, xMark, yBarra + 10, Fade(WHITE, 0.5f));
                 }
             }
         }
@@ -281,15 +328,24 @@ static void DesenharCena() {
         DrawCircleV(explosao.posicao, explosao.raio * 0.7f, Fade(YELLOW, 0.8f));
     }
 
-    // 5. HUD
+    // 5. HUD (Topo da Tela)
     if (etapaAtual == ETAPA_FIM) {
         DrawText(TextFormat("JOGADOR %d VENCEU!", vencedor), LARGURA_TELA_FASE2/2 - 150, ALTURA_TELA_FASE2/2 - 20, 40, GREEN);
         DrawText("Pressione [ENTER] para Voltar", LARGURA_TELA_FASE2/2 - 160, ALTURA_TELA_FASE2/2 + 30, 20, WHITE);
     } else {
-        const char* status = (etapaAtual == ETAPA_MIRAR) ? "MIRANDO..." : 
-                             (etapaAtual == ETAPA_CARREGAR) ? "CARREGANDO FORCA..." : "TORPEDO NA AGUA!";
-        Color corTexto = (jogadorDaVez == 0) ? YELLOW : RED;
-        DrawText(TextFormat("VEZ DO JOGADOR %d: %s", jogadorDaVez + 1, status), 20, 20, 20, corTexto);
+        // Mostra o botão que o jogador deve apertar
+        const char* botaoAcao = (jogadorDaVez == 0) ? "[SPACE]" : "[ENTER]";
+        
+        const char* status_base = (etapaAtual == ETAPA_MIRAR) ? "MIRANDO: APERTE %s PARA TRAVAR" : 
+                             (etapaAtual == ETAPA_CARREGAR) ? "FORÇA: APERTE %s PARA ATIRAR" : 
+                             "TORPEDO NA AGUA!";
+        
+        Color corTexto = (jogadorDaVez == 0) ? BLUE : RED;
+        
+        
+        const char* status_formatado = TextFormat(status_base, botaoAcao); 
+        
+        DrawText(TextFormat("VEZ DO JOGADOR %d: %s", jogadorDaVez + 1, status_formatado), 20, 20, 20, corTexto); 
     }
 
     EndDrawing();
@@ -310,14 +366,25 @@ static void ProcessarEntrada() {
 }
 
 int fase2() {
+    // --- SETUP ---
     GerarTerreno();
     InicializarSubmarinos();
+    CarregarAudios(); // Carrega os arquivos de áudio
+    PlayMusicStream(musica_fundo); // Inicia a música
     
     while (!WindowShouldClose()) {
-        if (IsKeyPressed(KEY_ESCAPE)) return 0;
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            StopMusicStream(musica_fundo); // Para a música
+            DescarregarAudios(); // Limpa a memória
+            return 0;
+        }
 
         if (etapaAtual == ETAPA_FIM) {
-            if (IsKeyPressed(KEY_ENTER)) return vencedor;
+            if (IsKeyPressed(KEY_ENTER)) {
+                StopMusicStream(musica_fundo); // Para a música
+                DescarregarAudios(); // Limpa a memória
+                return vencedor;
+            }
         } else {
             ProcessarEntrada();
             AtualizarLogica();
@@ -325,5 +392,9 @@ int fase2() {
 
         DesenharCena();
     }
+    
+    // --- CLEANUP ---
+    StopMusicStream(musica_fundo); // Para a música se a janela for fechada
+    DescarregarAudios(); // Limpa a memória
     return -1;
 }

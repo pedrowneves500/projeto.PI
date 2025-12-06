@@ -6,7 +6,7 @@
 #include <math.h>
 
 // --- CONSTANTES ---
-#define MAX_COLUNAS_TERRENO 150 // Aumentei um pouco mais a resolução
+#define MAX_COLUNAS_TERRENO 150 
 #define LARGURA_TELA_FASE2 1300
 #define ALTURA_TELA_FASE2 650
 
