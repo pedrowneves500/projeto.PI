@@ -32,16 +32,13 @@ static int vencedor = 0;
 
 static void CarregarAudios() {
     if (!IsAudioDeviceReady()) {
-        InitAudioDevice(); // Garante que o dispositivo de áudio está ativo
+        InitAudioDevice(); 
     }
 
-    // Carregar a Música de Fundo (MP3, OGG, etc.)
-    // Usamos LoadMusicStream para arquivos grandes
     musica_fundo = LoadMusicStream("audios/musica_fase2.mp3");
-    SetMusicVolume(musica_fundo, 0.4f); // Volume mais baixo para BGM
+    SetMusicVolume(musica_fundo, 0.4f); 
 
-    // Carregar Efeitos Sonoros (WAV é geralmente preferível para SFX)
-    som_explosao_terreno = LoadSound("audios/explosao_fase2.mp3"); // Pode ser o mesmo arquivo para ambos
+    som_explosao_terreno = LoadSound("audios/explosao_fase2.mp3"); 
     som_explosao_submarino = LoadSound("audios/game_over2.mp3"); 
     SetSoundVolume(som_explosao_submarino, 0.8f);
 }
@@ -50,7 +47,6 @@ static void DescarregarAudios() {
     UnloadMusicStream(musica_fundo);
     UnloadSound(som_explosao_terreno);
     UnloadSound(som_explosao_submarino);
-    CloseAudioDevice();
 }
 
 // --- FUNÇÕES AUXILIARES ---
@@ -137,7 +133,7 @@ static void DispararTorpedo() {
 
 static void AtualizarLogica() {
     
-    // --- ATUALIZAÇÃO DA MÚSICA DE FUNDO (Obrigatório para streaming) ---
+    // --- ATUALIZAÇÃO DA MÚSICA DE FUNDO ---
     UpdateMusicStream(musica_fundo);
     if (!IsMusicStreamPlaying(musica_fundo)) {
         PlayMusicStream(musica_fundo); // Loop da música
@@ -209,12 +205,12 @@ static void AtualizarLogica() {
 
         if (colidiu && etapaAtual != ETAPA_FIM) {
             
-            // --- TRATAMENTO DA DESTRUIÇÃO (Areia) ---
+            // --- TRATAMENTO DA DESTRUIÇÃO ---
             if (acertouChao) {
                 
                 PlaySound(som_explosao_terreno);
 
-                // TRUQUE IMPORTANTE: Avança a explosão para DENTRO da areia
+                // Avança a explosão para DENTRO da areia
                 explosao.posicao.x = torpedo.posicao.x + (torpedo.velocidade.x * 5.0f);
                 explosao.posicao.y = torpedo.posicao.y + (torpedo.velocidade.y * 5.0f);
                 
@@ -308,7 +304,7 @@ static void DesenharCena() {
                 DrawRectangle(xBarra, yBarra, (float)subs[i].forca/100 * 60, 8, ORANGE); 
                 DrawRectangleLines(xBarra, yBarra, 60, 8, WHITE);
                 
-                // Marca da força anterior na barra atual (Opcional, mas útil)
+                // Marca da força anterior na barra atual 
                 if (subs[i].temDisparoAnterior) {
                     float xMark = xBarra + ((float)subs[i].ultimaForca/100 * 60);
                     DrawLine(xMark, yBarra - 2, xMark, yBarra + 10, Fade(WHITE, 0.5f));
