@@ -16,7 +16,7 @@ Sound som_game_over = {0};
 Sound som_game_win = {0};
 
 // Comando de compilação para referência:
-// gcc -o jogo jogo.c menu.c fase1.c -lraylib -lopengl32 -lgdi32 -lwinmm -lm
+// gcc -o jogo jogo.c menu.c fase1.c fase2.c -lraylib -lopengl32 -lgdi32 -lwinmm -lm
 
 int main(void) 
 {
@@ -89,14 +89,9 @@ int main(void)
             } break;
 
             case STATE_FASE2:
-            {       fase2();
-                if (IsKeyPressed(KEY_ESCAPE)) estado_atual = STATE_MENU;
-                
-                BeginDrawing();
-                    ClearBackground(DARKGRAY);
-                    DrawText("FASE 2", 100, 100, 30, BLUE);
-                    DrawText("ESC para voltar ao Menu", 100, 150, 20, RAYWHITE);
-                EndDrawing();
+            {       
+                GameState proximo_estado = fase2();
+                estado_atual = proximo_estado;
             } break;
 
             case STATE_CREDITOS:

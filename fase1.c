@@ -407,7 +407,6 @@ int fase1() {
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
-        if (IsWindowReady()) CloseWindow(); 
         return STATE_MENU;
     }
 
@@ -489,7 +488,7 @@ int fase1() {
     if (jogador.x == Objetivo.x && jogador.y == Objetivo.y && meta_coletada) {
         iniciado = false;
         PlaySound(som_game_win);
-        return STATE_MENU;
+        return STATE_FASE2;
     }
 
     tubarao.x = (int)round(posicaoDesenhoTubarao.x / TAMANHO_CELULA);

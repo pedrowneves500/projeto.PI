@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "raylib.h" 
-
+#include "menu.h"
 // --- ESTRUTURAS DE ÁUDIO ---
 static Music musica_fundo;
 static Sound som_explosao_terreno; // Explosão na areia (cratera)
@@ -27,7 +27,6 @@ static int jogadorDaVez = 0;
 static EtapaTurno etapaAtual = ETAPA_MIRAR;
 static int direcaoOscilacao = 1;
 static int vencedor = 0;
-
 // --- FUNÇÕES DE CONTROLE DE ÁUDIO ---
 
 static void CarregarAudios() {
@@ -260,11 +259,11 @@ static void DesenharCena() {
         DrawRectangleRec(terreno[i].retangulo, terreno[i].cor);
     }
 
-    DrawText("JOGADOR 1 (BLUE)", 20, ALTURA_TELA_FASE2 - 45, 18, BLUE); 
+    DrawText("JOGADOR 1 (AZUL)", 20, ALTURA_TELA_FASE2 - 45, 18, BLUE); 
     DrawText("Aperte [SPACE]", 20, ALTURA_TELA_FASE2 - 25, 18, WHITE);
     
     // Jogador 2 (Direita)
-    const char* texto2 = "JOGADOR 2 (RED)";
+    const char* texto2 = "JOGADOR 2 (VERMELHO)";
     int larguraTexto2 = MeasureText(texto2, 18);
 
     DrawText(texto2, LARGURA_TELA_FASE2 - larguraTexto2 - 20, ALTURA_TELA_FASE2 - 45, 18, RED);
@@ -367,7 +366,7 @@ int fase2() {
     InicializarSubmarinos();
     CarregarAudios(); // Carrega os arquivos de áudio
     PlayMusicStream(musica_fundo); // Inicia a música
-    
+
     while (!WindowShouldClose()) {
         if (IsKeyPressed(KEY_ESCAPE)) {
             StopMusicStream(musica_fundo); // Para a música
@@ -379,7 +378,7 @@ int fase2() {
             if (IsKeyPressed(KEY_ENTER)) {
                 StopMusicStream(musica_fundo); // Para a música
                 DescarregarAudios(); // Limpa a memória
-                return vencedor;
+                return STATE_MENU;
             }
         } else {
             ProcessarEntrada();
